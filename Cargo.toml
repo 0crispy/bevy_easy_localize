@@ -1,0 +1,9 @@
+[package]
+name = "bevy_easy_localize"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = "0.9"
+csv = "1.1"
+serde = "1.0"
