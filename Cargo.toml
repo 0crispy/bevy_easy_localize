@@ -10,6 +10,16 @@ repository = "https://github.com/0crispy/bevy_easy_localize"
 readme = "README.md"
 
 [dependencies]
-bevy = "0.9"
+bevy = { version = "0.9", default-features = false, features = [
+    "bevy_asset",
+]}
 csv = "1.1"
 serde = "1.0"
+
+[dev-dependencies] 
+bevy = { version = "0.9", default-features = false, features = [
+    "bevy_asset",
+    "filesystem_watcher",
+    "bevy_winit",
+    "x11"
+]}
