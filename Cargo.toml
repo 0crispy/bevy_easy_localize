@@ -3,7 +3,7 @@ name = "bevy_easy_localize"
 version = "0.1.0"
 edition = "2021"
 
-license-file = "LICENSE.txt"
+license = "MIT OR Apache-2.0"
 description = "Lightweight bevy localization"
 homepage = "https://github.com/0crispy/bevy_easy_localize"
 repository = "https://github.com/0crispy/bevy_easy_localize"
