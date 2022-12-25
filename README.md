@@ -1,4 +1,5 @@
 # `bevy_easy_localize`
+[![Crates.io](https://img.shields.io/crates/v/bevy_easy_localize)](https://crates.io/crates/bevy_easy_localize)
 A simple crate to localize your game using .csv files.
 ## Features
 - Loading from `.csv` files
