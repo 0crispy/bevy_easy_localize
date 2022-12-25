@@ -1,6 +1,6 @@
 [package]
 name = "bevy_easy_localize"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 
 license = "MIT OR Apache-2.0"
@@ -8,18 +8,15 @@ description = "Lightweight localization in bevy"
 homepage = "https://github.com/0crispy/bevy_easy_localize"
 repository = "https://github.com/0crispy/bevy_easy_localize"
 readme = "README.md"
+documentation = "https://docs.rs/bevy_easy_localize"
 
 [dependencies]
 bevy = { version = "0.9", default-features = false, features = [
     "bevy_asset",
+    "bevy_text",
 ]}
 csv = "1.1"
 serde = "1.0"
 
 [dev-dependencies] 
-bevy = { version = "0.9", default-features = false, features = [
-    "bevy_asset",
-    "filesystem_watcher",
-    "bevy_winit",
-    "x11"
-]}
+bevy = "0.9"

@@ -16,7 +16,7 @@ impl Plugin for LocalizePlugin{
         app
             .add_asset::<Translation>()
             .init_asset_loader::<TranslationsAssetLoader>()
-            .add_system(init_localize_resource);
+            .add_system_to_stage(CoreStage::PreUpdate,update);
     }
 }
 /// You can use this resource in two ways:
@@ -42,21 +42,25 @@ impl Plugin for LocalizePlugin{
 /// delay until it gets initialized.
 #[derive(Resource)]
 pub struct Localize{
+    is_initialized:bool,
     set_language:Option<String>,
     current_language_id:usize,
     languages:HashMap<String,usize>,
     words:HashMap<String,Vec<String>>,
 
+    asset_handle_path:Option<String>,
     asset_handle:Option<Handle<Translation>>,
 }
 impl Localize{
     /// Initializes an empty resource
     pub fn empty() -> Self{
         Self{
+            is_initialized:false,
             set_language:None,
             current_language_id:0,
             languages: HashMap::new(),
             words: HashMap::new(),
+            asset_handle_path: None,
             asset_handle: None,
         }
     }
@@ -65,6 +69,11 @@ impl Localize{
     pub fn from_data(translations:&str) -> Self{
         let mut localize = Self::empty();
         localize.set_data(translations);
+        localize
+    }    
+    pub fn from_asset_path(path:&str) -> Self{
+        let mut localize = Self::empty();
+        localize.asset_handle_path = Some(path.to_string());
         localize
     }
     /// Sets data for the resource
@@ -88,10 +97,7 @@ impl Localize{
         }
         self.languages = languages;
         self.words = words;
-    }
-    /// Sets the asset handle for the resource.
-    pub fn set_handle(&mut self, translations:Handle<Translation>){  
-        self.asset_handle = Some(translations);
+        self.is_initialized = true;
     }
     /// Get a translation for a specified keyword.
     /// 
@@ -129,13 +135,38 @@ impl Localize{
         Ok(records)
     }
 }
+#[derive(Component)]
+pub struct LocalizeText{
+    sections:Vec<String>,
+    translated_language:Option<usize>,
+}
+impl LocalizeText{
+    pub fn from_section(keyword: impl Into<String>) -> Self{
+        Self {
+            sections:vec![keyword.into()],
+            translated_language:None,
+        }
+    }
+    pub fn from_sections(keywords:impl IntoIterator<Item = String>) -> Self{
+        Self { 
+            sections:keywords.into_iter().collect(),
+            translated_language:None,
+        }
+    }
+}
 
-fn init_localize_resource(
+fn update(
     localize:Option<ResMut<Localize>>,
     translation_assets:ResMut<Assets<Translation>>,
     mut ev_asset: EventReader<AssetEvent<Translation>>,
+    asset_server:Res<AssetServer>,
+    mut text:Query<(&mut Text,&mut LocalizeText)>,
 ){
     if let Some(mut localize) = localize{
+        if let Some(asset_handle_path) = localize.asset_handle_path.clone(){
+            localize.asset_handle_path = None;
+            localize.asset_handle = Some(asset_server.load(asset_handle_path));
+        }
         if let Some(asset_handle) = localize.asset_handle.clone(){
             for ev in ev_asset.iter() {
                 match ev {
@@ -149,10 +180,19 @@ fn init_localize_resource(
                 }
             }
         }
-        if let Some(language) = &localize.set_language{
-            if let Some(language_id) = localize.languages.get(language){
-                localize.current_language_id = *language_id;
-                localize.set_language = None;
+        
+        if let Some(language) = localize.set_language.clone(){
+            localize.set_language(&language);
+        }
+        if localize.is_initialized{
+            for (mut text, mut localize_text) in &mut text{
+                
+                if localize_text.translated_language.is_none() || localize_text.translated_language.unwrap_or(0) != localize.current_language_id{
+                    localize_text.translated_language = Some(localize.current_language_id);
+                    for (id,keyword) in localize_text.sections.iter().enumerate(){
+                        text.sections[id].value = localize.get(&keyword).to_string();
+                    }
+                }
             }
         }
     }

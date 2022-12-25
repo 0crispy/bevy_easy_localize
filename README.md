@@ -1,9 +1,11 @@
 # `bevy_easy_localize`
 [![Crates.io](https://img.shields.io/crates/v/bevy_easy_localize)](https://crates.io/crates/bevy_easy_localize)
+
 A simple crate to localize your game using .csv files.
 ## Features
 - Loading from `.csv` files
 - Loading the translation file from the asset folder
+- Automatically updating text components
 - Hot reloading
 - Lightweight
 ## Upcoming features
@@ -25,17 +27,11 @@ use bevy_easy_localize::Localize;
 pub fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        //Add the plugin
         .add_plugin(bevy_easy_localize::LocalizePlugin)
-        //Insert an empty resource
-        .insert_resource(Localize::empty())
-        .add_startup_system(init_localize)
+        //Insert the resource from an asset path
+        .insert_resource(Localize::from_asset_path("translations.csv"))
         .add_system(translate)
         .run();
-}
-fn init_localize(asset_server:Res<AssetServer>,mut localize:ResMut<Localize>){
-    //Set the handle
-    localize.set_handle(asset_server.load("test.csv"));
 }
 fn translate(
     keyboard:Res<Input<KeyCode>>,
@@ -49,9 +45,24 @@ fn translate(
     }
 }
 ```
+```rust
+commands.spawn((
+    TextBundle::from_section(
+        "default value",
+        TextStyle {
+            font: asset_server.load("font.ttf"),
+            font_size: 100.0,
+            color: Color::WHITE,
+        },
+    ),
+    //add this component to automatically translate text
+    LocalizeText::from_section("my_keyword")
+));
+```
 ## Examples
 - [`simple`](examples/simple.rs) – Reading from a file to initialize the resource.
 - [`asset`](examples/asset.rs) – Using asset handles to initialize the resource.
+- [`text`](examples/text.rs) – Using the `LocalizeText` component to update text.
 ## Bevy Compatibility
 |bevy|bevy_easy_localize|
 |---|---|

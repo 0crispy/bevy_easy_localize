@@ -7,17 +7,9 @@ pub fn main() {
             watch_for_changes: true,
         }).build())
         .add_plugin(bevy_easy_localize::LocalizePlugin)
-        .insert_resource(Localize::empty())
-        .add_startup_system(init_localize)
+        .insert_resource(Localize::from_asset_path("test.csv"))
         .add_system(press_space)
         .run();
-}
-
-fn init_localize(
-    asset_server:Res<AssetServer>,
-    mut localize:ResMut<Localize>,
-){
-    localize.set_handle(asset_server.load("test.csv"));
 }
 
 fn press_space(
