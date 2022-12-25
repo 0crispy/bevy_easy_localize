@@ -45,6 +45,7 @@ fn translate(
     }
 }
 ```
+Using the `LocalizeText` component:
 ```rust
 commands.spawn((
     TextBundle::from_section(
