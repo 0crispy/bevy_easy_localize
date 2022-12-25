@@ -71,6 +71,8 @@ impl Localize{
         localize.set_data(translations);
         localize
     }    
+    /// Creates a new resource from
+    /// specified asset path.
     pub fn from_asset_path(path:&str) -> Self{
         let mut localize = Self::empty();
         localize.asset_handle_path = Some(path.to_string());
@@ -135,18 +137,42 @@ impl Localize{
         Ok(records)
     }
 }
+/// Translates text.
+/// Use it with the [`Text`] component.
+/// ```
+/// commands.spawn((
+///     TextBundle::from_section(
+///        "default value",
+///        TextStyle {
+///            font: asset_server.load("font.ttf"),
+///            font_size: 100.0,
+///            color: Color::WHITE,
+///        },
+///     ),
+///     //The first section of the text will be
+///     //automatically translated
+///     //using the specified keyword
+///     LocalizeText::from_section("your_keyword")
+/// ));
+/// ```
 #[derive(Component)]
 pub struct LocalizeText{
     sections:Vec<String>,
     translated_language:Option<usize>,
 }
 impl LocalizeText{
+    /// The first section 
+    /// of the text will be translated
+    /// using the specified keyword 
     pub fn from_section(keyword: impl Into<String>) -> Self{
         Self {
             sections:vec![keyword.into()],
             translated_language:None,
         }
     }
+    /// All sections
+    /// of the text will be translated
+    /// using the specified keywords 
     pub fn from_sections(keywords:impl IntoIterator<Item = String>) -> Self{
         Self { 
             sections:keywords.into_iter().collect(),
