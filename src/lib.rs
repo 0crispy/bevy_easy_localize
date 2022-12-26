@@ -4,7 +4,6 @@ use bevy::{
     reflect::TypeUuid,
     utils::{BoxedFuture, HashMap},
 };
-use serde::Deserialize;
 /// Add this plugin if you are
 /// initializing the [`Localize`] resource
 /// from an asset handle.
@@ -82,12 +81,14 @@ impl Localize{
     pub fn set_data(&mut self, translations:&str){
         let mut languages = HashMap::new();
         let mut words = HashMap::new();
-        let records = match Self::get_records(translations){
-            Ok(records) => records,
-            Err(err) => {
-                panic!("Failed to parse translation file: {}", err);
-            },
-        };
+        
+        let csv = quick_csv::Csv::from_string(translations);
+        let mut records:Vec<Vec<_>> = Vec::new();
+        for row in csv.into_iter() {
+            if let Ok(row) = row {
+                records.push(row.columns().unwrap().map(|x|x.to_string()).collect());
+            }
+        }
         for (language_id,language) in records[0][2..].into_iter().enumerate(){
             languages.insert(language.to_string(),language_id);
         }
@@ -126,15 +127,6 @@ impl Localize{
         else{
             self.set_language = Some(language.to_string());
         }
-    }
-    fn get_records(translations:&str) -> Result<Vec<Vec<String>>,csv::Error>{
-        let mut rdr = csv::Reader::from_reader(translations.as_bytes());
-        let mut records:Vec<Vec<_>> = Vec::new();
-        records.push(rdr.headers()?.iter().map(|x|x.to_string()).collect::<Vec<_>>());
-        for result in rdr.records(){
-            records.push(result?.iter().map(|x|x.to_string()).collect());
-        }
-        Ok(records)
     }
 }
 /// Translates text.
@@ -224,7 +216,7 @@ fn update(
     }
 }
 
-#[derive(Debug, Deserialize, TypeUuid)]
+#[derive(Debug, TypeUuid)]
 #[uuid = "30222702-83bc-11ed-a1eb-0242ac120002"]
 pub struct Translation(String);
 

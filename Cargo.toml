@@ -15,8 +15,7 @@ bevy = { version = "0.9", default-features = false, features = [
     "bevy_asset",
     "bevy_text",
 ]}
-csv = "1.1"
-serde = "1.0"
+quick-csv = "0.1"
 
 [dev-dependencies] 
 bevy = "0.9"
