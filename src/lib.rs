@@ -218,7 +218,7 @@ fn update(
 
 #[derive(Debug, TypeUuid)]
 #[uuid = "30222702-83bc-11ed-a1eb-0242ac120002"]
-pub struct Translation(String);
+pub struct Translation(pub String);
 
 #[derive(Default)]
 struct TranslationsAssetLoader;
