@@ -15,7 +15,7 @@ impl Plugin for LocalizePlugin{
         app
             .add_asset::<Translation>()
             .init_asset_loader::<TranslationsAssetLoader>()
-            .add_system_to_stage(CoreStage::PreUpdate,update);
+            .add_system(update);
     }
 }
 /// You can use this resource in two ways:
