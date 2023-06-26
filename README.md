@@ -67,6 +67,7 @@ commands.spawn((
 ## Bevy Compatibility
 |bevy|bevy_easy_localize|
 |---|---|
+|0.10|0.2|
 |0.9|0.1|
 ## About
 I made this crate for my personal projects. 
