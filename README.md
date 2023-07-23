@@ -27,10 +27,10 @@ use bevy_easy_localize::Localize;
 pub fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(bevy_easy_localize::LocalizePlugin)
+        .add_plugins(bevy_easy_localize::LocalizePlugin)
         //Insert the resource from an asset path
         .insert_resource(Localize::from_asset_path("translations.csv"))
-        .add_system(translate)
+        .add_systems(Startup, translate)
         .run();
 }
 fn translate(
@@ -67,6 +67,7 @@ commands.spawn((
 ## Bevy Compatibility
 |bevy|bevy_easy_localize|
 |---|---|
+|0.11|0.3|
 |0.10|0.2|
 |0.9|0.1|
 ## About
