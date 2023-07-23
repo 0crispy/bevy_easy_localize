@@ -1,4 +1,6 @@
-use bevy::prelude::*;
+use std::time::Duration;
+
+use bevy::{prelude::*, asset::ChangeWatcher};
 use bevy_easy_localize::{Localize, LocalizeText};
 
 pub fn main() {
@@ -7,14 +9,14 @@ pub fn main() {
             DefaultPlugins
                 .set(AssetPlugin {
                     asset_folder: "examples/assets".to_string(),
-                    watch_for_changes: true,
+                    watch_for_changes: ChangeWatcher::with_delay(Duration::from_millis(200)),
                 })
                 .build(),
         )
-        .add_plugin(bevy_easy_localize::LocalizePlugin)
+        .add_plugins(bevy_easy_localize::LocalizePlugin)
         .insert_resource(Localize::from_asset_path("test.csv"))
-        .add_startup_system(setup)
-        .add_system(change_language)
+        .add_systems(Startup, setup)
+        .add_systems(Update, change_language)
         .run();
 }
 
