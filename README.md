@@ -67,6 +67,7 @@ commands.spawn((
 ## Bevy Compatibility
 |bevy|bevy_easy_localize|
 |---|---|
+|0.12|0.4|
 |0.11|0.3|
 |0.10|0.2|
 |0.9|0.1|

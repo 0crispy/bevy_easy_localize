@@ -1,5 +1,4 @@
 use std::fs::read_to_string;
-
 use bevy::{log::LogPlugin, prelude::*};
 use bevy_easy_localize::Localize;
 pub fn main() {
