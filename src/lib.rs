@@ -1,5 +1,5 @@
 use bevy::{
-    asset::{AssetLoader, LoadContext, LoadedAsset},
+    asset::{AssetLoader, LoadContext, io::Reader, AsyncReadExt},
     prelude::*,
     reflect::{TypePath, TypeUuid},
     utils::{BoxedFuture, HashMap},
@@ -12,8 +12,9 @@ use bevy::{
 pub struct LocalizePlugin;
 impl Plugin for LocalizePlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_asset::<Translation>()
-            .init_asset_loader::<TranslationsAssetLoader>()
+        app
+            .register_asset_loader(TranslationsAssetLoader)
+            .init_asset::<Translation>()
             .add_systems(Update, update);
     }
 }
@@ -185,10 +186,10 @@ fn update(
             localize.asset_handle = Some(asset_server.load(asset_handle_path));
         }
         if let Some(asset_handle) = localize.asset_handle.clone() {
-            for ev in ev_asset.iter() {
+            for ev in ev_asset.read() {
                 match ev {
-                    AssetEvent::Created { handle } | AssetEvent::Modified { handle } => {
-                        if handle == &asset_handle {
+                    AssetEvent::Added { id } | AssetEvent::Modified { id } => {
+                        if id == &asset_handle.id() {
                             let translation = translation_assets.get(&asset_handle).unwrap();
                             localize.set_data(&translation.0);
                         }
@@ -217,22 +218,27 @@ fn update(
     }
 }
 
-#[derive(Debug, TypeUuid, TypePath)]
+#[derive(Asset, Debug, TypeUuid, TypePath)]
 #[uuid = "30222702-83bc-11ed-a1eb-0242ac120002"]
 pub struct Translation(pub String);
 
 #[derive(Default)]
 struct TranslationsAssetLoader;
 impl AssetLoader for TranslationsAssetLoader {
+    type Asset = Translation;
+    type Settings = ();
+    type Error = std::io::Error;
     fn load<'a>(
         &'a self,
-        bytes: &'a [u8],
-        load_context: &'a mut LoadContext,
-    ) -> BoxedFuture<'a, Result<(), bevy::asset::Error>> {
+        reader: &'a mut Reader,
+        _: &'a Self::Settings,
+        _: &'a mut LoadContext,
+    ) -> BoxedFuture<'a, Result<Self::Asset, std::io::Error>> {
         Box::pin(async move {
-            let custom_asset = Translation(std::str::from_utf8(bytes).unwrap().to_string());
-            load_context.set_default_asset(LoadedAsset::new(custom_asset));
-            Ok(())
+            let mut bytes:Vec<u8> = Vec::new();
+            reader.read_to_end(&mut bytes).await?;
+            let translation_asset = Translation(std::str::from_utf8(&bytes).unwrap().to_string());
+            Ok(translation_asset)
         })
     }
 

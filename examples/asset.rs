@@ -1,14 +1,12 @@
-use std::time::Duration;
-
-use bevy::{asset::ChangeWatcher, prelude::*};
+use bevy::prelude::*;
 use bevy_easy_localize::Localize;
 pub fn main() {
     App::new()
         .add_plugins(
             DefaultPlugins
                 .set(AssetPlugin {
-                    asset_folder: "examples/assets".to_string(),
-                    watch_for_changes: ChangeWatcher::with_delay(Duration::from_millis(200)),
+                    file_path: "examples/assets".to_string(),
+                    ..Default::default()
                 })
                 .build(),
         )
