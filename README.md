@@ -34,7 +34,7 @@ pub fn main() {
         .run();
 }
 fn translate(
-    keyboard:Res<Input<KeyCode>>,
+    keyboard:Res<ButtonInput<KeyCode>>,
     mut localize:ResMut<Localize>,
 ){
     //Easily set the language
@@ -67,6 +67,7 @@ commands.spawn((
 ## Bevy Compatibility
 |bevy|bevy_easy_localize|
 |---|---|
+|0.13|0.5|
 |0.12|0.4|
 |0.11|0.3|
 |0.10|0.2|

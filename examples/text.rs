@@ -33,11 +33,11 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         LocalizeText::from_section("hello"),
     ));
 }
-fn change_language(keyboard: Res<Input<KeyCode>>, mut localize: ResMut<Localize>) {
-    if keyboard.just_pressed(KeyCode::E) {
+fn change_language(keyboard: Res<ButtonInput<KeyCode>>, mut localize: ResMut<Localize>) {
+    if keyboard.just_pressed(KeyCode::KeyE) {
         localize.set_language("English");
     }
-    if keyboard.just_pressed(KeyCode::G) {
+    if keyboard.just_pressed(KeyCode::KeyG) {
         localize.set_language("German");
     }
 }

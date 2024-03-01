@@ -1,7 +1,7 @@
 use bevy::{
     asset::{AssetLoader, LoadContext, io::Reader, AsyncReadExt},
     prelude::*,
-    reflect::{TypePath, TypeUuid},
+    reflect::TypePath,
     utils::{BoxedFuture, HashMap},
 };
 /// Add this plugin if you are
@@ -218,10 +218,8 @@ fn update(
     }
 }
 
-#[derive(Asset, Debug, TypeUuid, TypePath)]
-#[uuid = "30222702-83bc-11ed-a1eb-0242ac120002"]
+#[derive(Asset, TypePath, Debug)]
 pub struct Translation(pub String);
-
 #[derive(Default)]
 struct TranslationsAssetLoader;
 impl AssetLoader for TranslationsAssetLoader {

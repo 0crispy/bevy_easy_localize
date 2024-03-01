@@ -16,7 +16,7 @@ pub fn main() {
         .run();
 }
 
-fn press_space(keyboard: Res<Input<KeyCode>>, mut localize: ResMut<Localize>) {
+fn press_space(keyboard: Res<ButtonInput<KeyCode>>, mut localize: ResMut<Localize>) {
     localize.set_language("German");
     if keyboard.just_pressed(KeyCode::Space) {
         println!("{}", localize.get("start_game"));
