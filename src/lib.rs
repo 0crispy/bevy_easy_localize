@@ -1,8 +1,9 @@
+use std::future::Future;
 use bevy::{
-    asset::{AssetLoader, LoadContext, io::Reader, AsyncReadExt},
+    asset::{io::Reader, AssetLoader, AsyncReadExt, LoadContext},
     prelude::*,
     reflect::TypePath,
-    utils::{BoxedFuture, HashMap},
+    utils::{ConditionalSendFuture, HashMap},
 };
 /// Add this plugin if you are
 /// initializing the [`Localize`] resource
@@ -42,11 +43,10 @@ impl Plugin for LocalizePlugin {
 #[derive(Resource)]
 pub struct Localize {
     is_initialized: bool,
-    set_language: Option<String>,
+    set_language_after_init:Option<String>,
     current_language_id: usize,
     languages: HashMap<String, usize>,
     words: HashMap<String, Vec<String>>,
-
     asset_handle_path: Option<String>,
     asset_handle: Option<Handle<Translation>>,
 }
@@ -55,7 +55,7 @@ impl Localize {
     pub fn empty() -> Self {
         Self {
             is_initialized: false,
-            set_language: None,
+            set_language_after_init:None,
             current_language_id: 0,
             languages: HashMap::new(),
             words: HashMap::new(),
@@ -76,6 +76,12 @@ impl Localize {
         let mut localize = Self::empty();
         localize.asset_handle_path = Some(path.to_string());
         localize
+    }
+    /// Creates a new resource from `self` with a
+    /// given default language.
+    pub fn with_default_language(mut self, language:impl ToString) -> Self{
+        self.set_language(language);
+        self
     }
     /// Sets data for the resource
     pub fn set_data(&mut self, translations: &str) {
@@ -102,7 +108,7 @@ impl Localize {
         }
         self.languages = languages;
         self.words = words;
-        self.is_initialized = true;
+        self.initialized();
     }
     /// Get a translation for a specified keyword.
     ///
@@ -121,11 +127,24 @@ impl Localize {
         }
     }
     /// Sets the language for the resource.
-    pub fn set_language(&mut self, language: &str) {
-        if let Some(language_id) = self.languages.get(language) {
-            self.current_language_id = *language_id;
-        } else {
-            self.set_language = Some(language.to_string());
+    pub fn set_language(&mut self, language: impl ToString){
+        let language = language.to_string();
+        if self.is_initialized{
+            if let Some(language_id) = self.languages.get(&language) {
+                self.current_language_id = *language_id;
+            } 
+            else {
+                error!("Language not found! ({})", language);
+            }
+        }
+        else{
+            self.set_language_after_init = Some(language);
+        }
+    }
+    fn initialized(&mut self){
+        self.is_initialized = true;
+        if let Some(language) = self.set_language_after_init.clone(){
+            self.set_language(language);
         }
     }
 }
@@ -198,10 +217,6 @@ fn update(
                 }
             }
         }
-
-        if let Some(language) = localize.set_language.clone() {
-            localize.set_language(&language);
-        }
         if localize.is_initialized {
             for (mut text, mut localize_text) in &mut text {
                 if localize_text.translated_language.is_none()
@@ -231,7 +246,7 @@ impl AssetLoader for TranslationsAssetLoader {
         reader: &'a mut Reader,
         _: &'a Self::Settings,
         _: &'a mut LoadContext,
-    ) -> BoxedFuture<'a, Result<Self::Asset, std::io::Error>> {
+    ) -> impl ConditionalSendFuture + Future<Output = Result<<Self as AssetLoader>::Asset, <Self as AssetLoader>::Error>> {
         Box::pin(async move {
             let mut bytes:Vec<u8> = Vec::new();
             reader.read_to_end(&mut bytes).await?;
